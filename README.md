@@ -1,6 +1,6 @@
 # Evolutionary Source Visualizations
 
-Visualization of evolutionary coupling between files.
+Visualization of evolutionary coupling between files. [Live demo](http://pnavarrc.github.io/evsrc-visualization/dist).
 
 ## References
 
