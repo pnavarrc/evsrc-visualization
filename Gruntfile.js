@@ -48,6 +48,10 @@ module.exports = function (grunt) {
       gruntfile: {
         files: ['Gruntfile.js']
       },
+      less: {
+        files: ['less/{,*/}*.less'],
+        tasks: ['less']
+      },
       styles: {
         files: ['<%= config.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'autoprefixer']
@@ -312,6 +316,19 @@ module.exports = function (grunt) {
       }
     },
 
+    // Compile the styles
+    less: {
+      development: {
+        options: {
+          paths: ['app/styles/css']
+        },
+        files: {
+          'app/styles/main.css': 'less/main.less'
+        }
+      }
+    },
+
+
     // Run some tasks in parallel to speed up build process
     concurrent: {
       server: [
@@ -369,6 +386,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
+    'less',
     'wiredep',
     'useminPrepare',
     'concurrent:dist',

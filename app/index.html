@@ -16,13 +16,6 @@
     <link rel="stylesheet" href="styles/main.css">
     <!-- endbuild -->
 
-    <style>
-      .link {
-        stroke-width: 1;
-        stroke: #000;
-      }
-    </style>
-
   </head>
   <body>
     <!--[if lt IE 10]>
@@ -30,31 +23,30 @@
     <![endif]-->
 
 
-    <div class="container-fluid">
+    <div class="container">
       <div class="header">
-        <ul class="nav nav-pills pull-right">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Contact</a></li>
-        </ul>
-        <h3 class="text-muted">evsrc visualisation</h3>
+        <h1>Evolutionary Source Visualization</h1>
       </div>
+
+      <p>Visualizations for the <a href="https://github.com/armish/evsrc">evsrc: Evolutionary Source Project</a>. For additional context, please refer to the following links:</p>
+
+      <ul>
+        <li><a href="http://ergoso.me/computer/science/github/software/evolutionary/couplings/2014/12/10/evsrc-evolutionary-couplings-reveal-poor-software-design.html">evSrc: Evolutionary couplings between files reveal poor design choices in source architecture</a></li>
+        <li><a href="https://github.com/armish/evsrc">Evolutionary Source Project (GitHub)</a></li>
+      </ul>
+
+      <p>The source code of this visualization is available in <a href="https://github.com/pnavarrc/evsrc-visualization">GitHub</a>.</p>
+
+      <h2>Network Chart</h2>
+
+      <p>The following network chart represents the couplings between files for the project <a href=" https://github.com/PowerDNS/pdns">PowerDNS</a>, using all the available git history. Each node represents a file in the project, a link between two nodes indicates that changes between the files are correlated (correlation > 0).</p>
+
+      <p><a href="https://gist.github.com/anonymous/c2556ee83a90cf0861b3">Original Dataset</a></p>
 
       <div id="visualization-container"></div>
 
-      <div class="row marketing">
-        <div class="col-lg-6">
-          <h4>HTML5 Boilerplate</h4>
-          <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
-
-          <h4>Bootstrap</h4>
-          <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
-
-        </div>
-      </div>
-
       <div class="footer">
-        <p><span class="glyphicon glyphicon-heart"></span> from the Yeoman team</p>
+        <p>by <a href="http://pnavarrc.github.io">Pablo Navarro</a></p>
       </div>
 
     </div>
@@ -65,6 +57,7 @@
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/d3/d3.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/d3-tip/index.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 

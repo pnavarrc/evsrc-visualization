@@ -32,7 +32,6 @@ function computeNetwork(data, correlationThreshold) {
 
 
 	// Generate the links
-	var links = [];
 	_.each(rows, function(row) {
 	
 		var source = nodeMap[row.fileA],
@@ -47,6 +46,12 @@ function computeNetwork(data, correlationThreshold) {
 	return network;
 }
 
+// Initialize the tooltip
+var tip = d3.tip()
+	.attr('class', 'd3-tip')
+	.offset([-20, 0])
+	.html(function(d) { return d.name; });
+
 
 d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
 
@@ -54,22 +59,24 @@ d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
 		throw error;
 	}
 
-	var width  = 960,
-			height = 600;
-
-	var graph = computeNetwork(data, 0.1);
-
-	var force = d3.layout.force()
-		.nodes(graph.nodes)
-		.links(graph.links)
-		.size([width, height])
-		.start();
-
+	var graph = computeNetwork(data, 0);
 
 	var div = d3.select('#visualization-container'),
 			svg = div.selectAll('svg').data([graph]);
 
-	svg.enter().append('svg');
+	var width = Math.min(parseInt(div.style('width'), 10), 750),
+			height = width;
+
+	var force = d3.layout.force()
+		.nodes(graph.nodes)
+		.links(graph.links)
+		.gravity(0.15)
+		.size([width, height])
+		.start();
+
+	svg.enter().append('svg')
+		.classed('network-chart', true)
+		.call(tip);
 
 	svg
 		.attr('width', width)
@@ -87,6 +94,22 @@ d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
 		.attr('r', 5)
 		.call(force.drag);
 
+	nodes
+		.on('mouseover', function(d) {
+			
+			d3.select(this).transition()
+				.attr('r', 8);
+
+			tip.show(d);
+		})
+		.on('mouseout', function(d) {
+
+			d3.select(this).transition()
+				.attr('r', 5);
+
+			tip.hide(d);
+		});
+
 	force.on('tick', function() {
 
 		links
@@ -97,13 +120,15 @@ d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
 
 		nodes
 			.attr('cx', function(d) { return d.x; })
-			.attr('cy', function(d) { return d.y; })
+			.attr('cy', function(d) { return d.y; });
 
 	});
 
+	nodes.exit().remove();
+
+	links.exit().remove();
+
 	svg.exit().remove();
-
-
 
 
 });
