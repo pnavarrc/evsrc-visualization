@@ -35,11 +35,6 @@ svg.network-chart {
   fill: #bcbcbc;
   stroke-width: 0;
 }
-.node:hover {
-  fill: #3299bb;
-  stroke: #50b0d0;
-  stroke-width: 1;
-}
 .link {
   stroke: #bcbcbc;
 }
