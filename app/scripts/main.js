@@ -11,10 +11,8 @@ function parseRow(item) {
 
 function computeNetwork(data, correlationThreshold) {
 
-	var network = {
-		nodes: [],
-		links: []
-	};
+	var links = [],
+		nodes = [];
 
 	var rows = _.map(data, parseRow);
 
@@ -24,33 +22,91 @@ function computeNetwork(data, correlationThreshold) {
 
 	var nodeMap = {};
 
+	// Variables for clustering and coloring
+	var clusters = [],
+		colors = d3.scale.category20().range();
+
 	// Nodes
 	_.each(fileNames, function(name, index) {
-		network.nodes.push({name: name, index: index});
+		nodes.push({name: name, index: index });
 		nodeMap[name] = index;
 	});
 
-
 	// Generate the links
 	_.each(rows, function(row) {
-	
+
 		var source = nodeMap[row.fileA],
 				target = nodeMap[row.fileB];
-	
-		if (row.corr > correlationThreshold) {
-			network.links.push({source: source, target: target});			
-		}
 
+		var n1, n2, c1, c2,
+				newCluster;
+
+		if (row.corr > correlationThreshold) {
+			links.push({source: source, target: target});
+
+			n1 = nodes[source];
+			n2 = nodes[target];
+			c1 = n1.cluster;
+			c2 = n2.cluster;
+
+			if ( _.isUndefined(c1) && _.isUndefined(c2) ) {
+				// Create new cluster
+				n1.cluster = [n1,n2];
+				n2.cluster = n1.cluster;
+				clusters.push(n1.cluster);
+			} else if ( _.isUndefined(c1) ) {
+				// Add lone node to other one's cluster
+				c2.push(n1);
+				n1.cluster = c2;
+			} else if ( _.isUndefined(c2) ) {
+				c1.push(n2);
+				n2.cluster = c1;
+			} else if (c1 !== c2) {
+				// Merge clusters and update its reference among its elements
+				newCluster = c1.concat(c2);
+				_.each(newCluster, function(n) {
+					n.cluster = newCluster;
+				});
+				clusters[ clusters.indexOf(c1) ] = newCluster;
+				clusters[ clusters.indexOf(c2) ] = undefined;
+			}
+		}
 	});
 
-	return network;
+	_.each(clusters, function(c,i) {
+		if ( _.isUndefined(c) ) {
+			return;
+		}
+
+		var group = {
+			tooltip: [],
+			name: 'cluster'+ i
+		};
+
+		_.each(c, function(n, i) {
+			// Assign distinct color
+			n.color = colors[i];
+			n.group = group;
+			// Build tooltip common for all group
+			group.tooltip.push('<span style="color:'+ n.color +'">'+ n.name +'</span>');
+
+			// This reference is no longer needed
+			delete n.cluster;
+		});
+		group.tooltip = group.tooltip.join('<br>');
+	});
+
+	return {
+		nodes: nodes,
+		links: links,
+	};
 }
 
 // Initialize the tooltip
 var tip = d3.tip()
 	.attr('class', 'd3-tip')
 	.offset([-20, 0])
-	.html(function(d) { return d.name; });
+	.html(function(d) { return d; });
 
 
 d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
@@ -94,18 +150,27 @@ d3.tsv('data/partialCorrelations_0.1.sif', function(error, data) {
 		.attr('r', 5)
 		.call(force.drag);
 
+	// Mark all circles with their cluster
+	svg.selectAll('.node').each(function(d) {
+		d3.select(this).classed(d.group.name, true);
+	});
+
 	nodes
 		.on('mouseover', function(d) {
-			
-			d3.select(this).transition()
-				.attr('r', 8);
+			// Color all nodes of this cluster
+			svg.selectAll('.' + d.group.name).each(function(n) {
+				d3.select(this)
+					.transition()
+					.style('fill', n.color);
+			});
 
-			tip.show(d);
+			tip.show(d.group.tooltip);
 		})
 		.on('mouseout', function(d) {
-
-			d3.select(this).transition()
-				.attr('r', 5);
+			// Back to grey
+			svg.selectAll('.' + d.group.name)
+				.transition()
+				.style('fill', '#bcbcbc');
 
 			tip.hide(d);
 		});
